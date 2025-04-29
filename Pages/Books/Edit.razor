@@ -1,0 +1,184 @@
+@page "/books/edit/{Id:int}"
+@using LibraryManagementSystem.Data.Models
+@using LibraryManagementSystem.Data.Services
+@inject IBookService BookService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Edit Book - Library Management System</PageTitle>
+
+@if (book == null)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col">
+                <h1>Edit Book</h1>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <EditForm Model="@book" OnValidSubmit="HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+
+                            <div class="form-group mb-3">
+                                <label for="isbn">ISBN</label>
+                                <InputText id="isbn" @bind-Value="book.ISBN" class="form-control" />
+                                <ValidationMessage For="@(() => book.ISBN)" />
+                                <small class="form-text text-muted">Enter 10 or 13 digit ISBN number</small>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="title">Title</label>
+                                <InputText id="title" @bind-Value="book.Title" class="form-control" />
+                                <ValidationMessage For="@(() => book.Title)" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="author">Author</label>
+                                <InputText id="author" @bind-Value="book.Author" class="form-control" />
+                                <ValidationMessage For="@(() => book.Author)" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="category">Category</label>
+                                <InputSelect id="category" @bind-Value="book.Category" class="form-select">
+                                    <option value="">Select a category</option>
+                                    <option value="Fiction">Fiction</option>
+                                    <option value="Non-Fiction">Non-Fiction</option>
+                                    <option value="Science">Science</option>
+                                    <option value="Technology">Technology</option>
+                                    <option value="History">History</option>
+                                    <option value="Biography">Biography</option>
+                                    <option value="Children">Children</option>
+                                    <option value="Other">Other</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => book.Category)" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="description">Description</label>
+                                <InputTextArea id="description" @bind-Value="book.Description" class="form-control" rows="3" />
+                                <ValidationMessage For="@(() => book.Description)" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="publicationDate">Publication Date</label>
+                                <InputDate TValue="DateTime?" id="publicationDate" @bind-Value="book.PublicationDate" class="form-control" />
+                                <ValidationMessage For="@(() => book.PublicationDate)" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="publisher">Publisher</label>
+                                <InputText id="publisher" @bind-Value="book.Publisher" class="form-control" />
+                                <ValidationMessage For="@(() => book.Publisher)" />
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="totalCopies">Total Copies</label>
+                                        <InputNumber id="totalCopies" @bind-Value="book.TotalCopies" class="form-control" />
+                                        <ValidationMessage For="@(() => book.TotalCopies)" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="availableCopies">Available Copies</label>
+                                        <InputNumber id="availableCopies" @bind-Value="book.AvailableCopies" class="form-control" />
+                                        <ValidationMessage For="@(() => book.AvailableCopies)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="location">Location</label>
+                                <InputText id="location" @bind-Value="book.Location" class="form-control" />
+                                <ValidationMessage For="@(() => book.Location)" />
+                                <small class="form-text text-muted">Physical location of the book in the library</small>
+                            </div>
+
+                            <div class="alert alert-info mt-3">
+                                <h5>Book Information</h5>
+                                <p>Status: @(book.IsAvailable ? "Available" : "Not Available")</p>
+                                <p>Created At: @book.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</p>
+                                <p>Last Updated: @book.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</p>
+                            </div>
+
+                            <div class="form-group mt-4">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <button type="button" class="btn btn-secondary" @onclick="NavigateToList">Cancel</button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Book? book;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBook();
+    }
+
+    private async Task LoadBook()
+    {
+        try
+        {
+            book = await BookService.GetBookByIdAsync(Id);
+            if (book == null)
+            {
+                errorMessage = "Book not found";
+                await JSRuntime.InvokeVoidAsync("alert", errorMessage);
+                NavigationManager.NavigateTo("/books");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading book: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync("alert", errorMessage);
+            NavigationManager.NavigateTo("/books");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (book == null) return;
+
+            book.UpdatedAt = DateTime.UtcNow;
+            await BookService.UpdateBookAsync(book);
+            NavigationManager.NavigateTo("/books");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error updating book: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync("alert", errorMessage);
+        }
+    }
+
+    private void NavigateToList()
+    {
+        NavigationManager.NavigateTo("/books");
+    }
+} 

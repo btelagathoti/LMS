@@ -1,0 +1,255 @@
+@page "/"
+@using LibraryManagementSystem.Data.Models
+@using LibraryManagementSystem.Data.Services
+@inject IBookService BookService
+@inject IMemberService MemberService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Dashboard - Library Management System</PageTitle>
+
+@if (isLoading)
+{
+    <div class="text-center p-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading dashboard data...</p>
+    </div>
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">Error</h4>
+        <p>@errorMessage</p>
+        <hr>
+        <p class="mb-0">
+            Please try refreshing the page. If the problem persists, contact support.
+            <button class="btn btn-outline-danger ms-2" @onclick="RetryLoading">
+                <i class="bi bi-arrow-clockwise"></i> Retry
+            </button>
+        </p>
+    </div>
+}
+else
+{
+    <h1>Dashboard</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-3 mb-4">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Books</h5>
+                    <p class="card-text display-4">@totalBooks</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Available Books</h5>
+                    <p class="card-text display-4">@availableBooks</p>
+                    <small>@availabilityPercentage% availability</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Members</h5>
+                    <p class="card-text display-4">@totalMembers</p>
+                    <small>@activeMembers active members</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Due Today</h5>
+                    <p class="card-text display-4">@dueTodayCount</p>
+                    <small>Books to be returned today</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Popular Books</h5>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="LoadPopularBooks">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    @if (!popularBooks.Any())
+                    {
+                        <p class="text-muted">No books found.</p>
+                    }
+                    else
+                    {
+                        <div class="list-group">
+                            @foreach (var book in popularBooks)
+                            {
+                                <div class="list-group-item">
+                                    <h6 class="mb-1">@book.Title</h6>
+                                    <small class="text-muted">
+                                        @(book.TotalCopies - book.AvailableCopies) borrowed / @book.TotalCopies total
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Recent Members</h5>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="LoadRecentMembers">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    @if (!recentMembers.Any())
+                    {
+                        <p class="text-muted">No members found.</p>
+                    }
+                    else
+                    {
+                        <div class="list-group">
+                            @foreach (var member in recentMembers)
+                            {
+                                <div class="list-group-item">
+                                    <h6 class="mb-1">@member.FullName</h6>
+                                    <small class="text-muted">
+                                        Joined @member.MembershipStartDate.ToLocalTime().ToString("MMM dd, yyyy")
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private int totalBooks;
+    private int totalMembers;
+    private int availableBooks;
+    private int currentlyBorrowed;
+    private int activeMembers;
+    private int newBooksThisMonth;
+    private int dueTodayCount;
+    private decimal availabilityPercentage;
+    private List<Book> popularBooks = new();
+    private List<Member> recentMembers = new();
+    private string? errorMessage;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboardData();
+    }
+
+    private async Task LoadDashboardData()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+            StateHasChanged();
+
+            // Load data sequentially to avoid DbContext concurrency issues
+            await LoadStatistics();
+            await LoadPopularBooks();
+            await LoadRecentMembers();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred while loading the dashboard.";
+            Console.WriteLine($"Dashboard initialization error: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task RetryLoading()
+    {
+        await LoadDashboardData();
+    }
+
+    private async Task LoadStatistics()
+    {
+        try
+        {
+            // Load books and calculate book-related statistics
+            var books = (await BookService.GetAllBooksAsync())?.ToList() ?? new List<Book>();
+            totalBooks = books.Count;
+            availableBooks = books.Sum(b => b.AvailableCopies);
+            currentlyBorrowed = books.Sum(b => b.TotalCopies - b.AvailableCopies);
+            
+            var totalCopies = books.Sum(b => b.TotalCopies);
+            availabilityPercentage = totalCopies > 0 
+                ? Math.Round((decimal)availableBooks / totalCopies * 100, 1)
+                : 0;
+
+            newBooksThisMonth = books.Count(b => b.CreatedAt >= DateTime.UtcNow.AddMonths(-1));
+
+            // Load members and calculate member-related statistics
+            var members = (await MemberService.GetAllMembersAsync())?.ToList() ?? new List<Member>();
+            totalMembers = members.Count;
+            activeMembers = members.Count(m => m.IsActive);
+            
+            var today = DateTime.UtcNow.Date;
+            dueTodayCount = members
+                .SelectMany(m => m.BorrowedBooks ?? Enumerable.Empty<BorrowedBook>())
+                .Count(bb => bb != null && bb.DueDate.Date == today);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading statistics: {ex.Message}");
+            throw;
+        }
+    }
+
+    private async Task LoadPopularBooks()
+    {
+        try
+        {
+            var allBooks = await BookService.GetAllBooksAsync() ?? new List<Book>();
+            popularBooks = allBooks
+                .OrderByDescending(b => b.TotalCopies - b.AvailableCopies)
+                .Take(5)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading popular books: {ex.Message}");
+            throw;
+        }
+    }
+
+    private async Task LoadRecentMembers()
+    {
+        try
+        {
+            var allMembers = await MemberService.GetAllMembersAsync() ?? new List<Member>();
+            recentMembers = allMembers
+                .OrderByDescending(m => m.MembershipStartDate)
+                .Take(5)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading recent members: {ex.Message}");
+            throw;
+        }
+    }
+} 

@@ -1,0 +1,214 @@
+@page "/books"
+@using LibraryManagementSystem.Data.Models
+@using LibraryManagementSystem.Data.Services
+@inject IBookService BookService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Books - Library Management System</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h1>Books Management</h1>
+        </div>
+        <div class="col-6 text-end">
+            <a href="/books/create" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add New Book
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search by title, author, ISBN..." 
+                               @bind="searchTerm" @bind:event="oninput" />
+                        <button class="btn btn-outline-secondary" type="button" @onclick="() => ApplyFilters()">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" @bind="selectedCategory" @bind:event="oninput" @onchange="ApplyFilters">
+                        <option value="">All Categories</option>
+                        <option value="Fiction">Fiction</option>
+                        <option value="Non-Fiction">Non-Fiction</option>
+                        <option value="Science">Science</option>
+                        <option value="Technology">Technology</option>
+                        <option value="History">History</option>
+                        <option value="Biography">Biography</option>
+                        <option value="Children">Children</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" @bind="availabilityFilter" @bind:event="oninput" @onchange="ApplyFilters">
+                        <option value="">All Availability</option>
+                        <option value="Available">Available</option>
+                        <option value="Borrowed">Borrowed</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary w-100" @onclick="ResetFilters">
+                        <i class="bi bi-x-circle"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ISBN</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Category</th>
+                            <th>Copies</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (filteredBooks == null || !filteredBooks.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center">No books found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var book in filteredBooks)
+                            {
+                                <tr>
+                                    <td>@book.ISBN</td>
+                                    <td>@book.Title</td>
+                                    <td>@book.Author</td>
+                                    <td>@book.Category</td>
+                                    <td>@book.AvailableCopies / @book.TotalCopies</td>
+                                    <td>
+                                        @if (book.IsAvailable)
+                                        {
+                                            <span class="badge bg-success">Available</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">Borrowed</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a href="@($"/books/{book.Id}")" class="btn btn-sm btn-info me-2" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="@($"/books/edit/{book.Id}")" class="btn btn-sm btn-primary me-2" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteBook(book.Id)" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <p class="mb-0">
+                        Showing @(filteredBooks?.Count() ?? 0) of @(allBooks?.Count() ?? 0) books
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Book> allBooks = new();
+    private List<Book> filteredBooks = new();
+    private string searchTerm = "";
+    private string selectedCategory = "";
+    private string availabilityFilter = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBooks();
+    }
+
+    private async Task LoadBooks()
+    {
+        var books = await BookService.GetAllBooksAsync();
+        allBooks = books?.ToList() ?? new List<Book>();
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        if (allBooks == null)
+        {
+            filteredBooks = new List<Book>();
+            return;
+        }
+
+        filteredBooks = allBooks.ToList();
+
+        // Apply search filter
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredBooks = filteredBooks
+                .Where(b =>
+                    b.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    b.Author.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    b.ISBN.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    b.Publisher.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    b.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        // Apply category filter
+        if (!string.IsNullOrWhiteSpace(selectedCategory))
+        {
+            filteredBooks = filteredBooks
+                .Where(b => b.Category.Equals(selectedCategory, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        // Apply availability filter
+        if (!string.IsNullOrWhiteSpace(availabilityFilter))
+        {
+            bool isAvailable = availabilityFilter.Equals("Available", StringComparison.OrdinalIgnoreCase);
+            filteredBooks = filteredBooks.Where(b => b.IsAvailable == isAvailable).ToList();
+        }
+
+        StateHasChanged();
+    }
+
+    private void ResetFilters()
+    {
+        searchTerm = "";
+        selectedCategory = "";
+        availabilityFilter = "";
+        filteredBooks = allBooks?.ToList() ?? new List<Book>();
+        StateHasChanged();
+    }
+
+    private async Task DeleteBook(int id)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this book?"))
+        {
+            try
+            {
+                await BookService.DeleteBookAsync(id);
+                await LoadBooks();
+            }
+            catch (Exception ex)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", $"Error deleting book: {ex.Message}");
+            }
+        }
+    }
+} 

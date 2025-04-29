@@ -1,0 +1,224 @@
+@page "/catalog"
+@using LibraryManagementSystem.Data.Models
+@using LibraryManagementSystem.Data.Services
+@inject IBookService BookService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Book Catalog - Library Management System</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-center">Library Catalog</h1>
+            <p class="text-center text-muted">Discover our collection of books</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <div class="input-group input-group-lg">
+                <input type="text" class="form-control" placeholder="Search by title, author, or category..." 
+                       @bind="searchTerm" @bind:event="oninput" />
+                <button class="btn btn-primary" type="button" @onclick="() => ApplyFilters()">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Filters</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Category</label>
+                        @foreach (var category in categories)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="category" 
+                                       value="@category" @onchange="@(e => FilterByCategory(category))"
+                                       checked="@(selectedCategory == category)" />
+                                <label class="form-check-label">@category</label>
+                            </div>
+                        }
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="category" 
+                                   value="" @onchange="@(e => FilterByCategory(""))"
+                                   checked="@(string.IsNullOrEmpty(selectedCategory))" />
+                            <label class="form-check-label">All Categories</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Availability</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" 
+                                   @bind="showOnlyAvailable" @bind:event="oninput" @onchange="ApplyFilters" />
+                            <label class="form-check-label">Show only available books</label>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-outline-secondary w-100" @onclick="ResetFilters">
+                        <i class="bi bi-x-circle"></i> Clear Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            @if (filteredBooks == null)
+            {
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            }
+            else if (!filteredBooks.Any())
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No books found matching your criteria.
+                </div>
+            }
+            else
+            {
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    @foreach (var book in filteredBooks)
+                    {
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title text-truncate" title="@book.Title">@book.Title</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">by @book.Author</h6>
+                                    
+                                    <div class="mb-2">
+                                        <span class="badge bg-secondary">@book.Category</span>
+                                        @if (book.IsAvailable)
+                                        {
+                                            <span class="badge bg-success ms-1">Available</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning ms-1">Borrowed</span>
+                                        }
+                                    </div>
+
+                                    <p class="card-text small text-truncate" title="@book.Description">
+                                        @book.Description
+                                    </p>
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            @book.AvailableCopies of @book.TotalCopies copies available
+                                        </small>
+                                        <div class="btn-group">
+                                            <a href="/catalog/@book.Id" class="btn btn-outline-primary btn-sm">
+                                                View Details
+                                            </a>
+                                            @if (book.IsAvailable)
+                                            {
+                                                <a href="/catalog/@book.Id" class="btn btn-success btn-sm">
+                                                    <i class="bi bi-cart"></i> Rent
+                                                </a>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Book> allBooks;
+    private List<Book> filteredBooks;
+    private string searchTerm = "";
+    private string selectedCategory = "";
+    private bool showOnlyAvailable = false;
+
+    private readonly string[] categories = new[]
+    {
+        "Fiction",
+        "Non-Fiction",
+        "Science",
+        "Technology",
+        "History",
+        "Biography",
+        "Children",
+        "Other"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBooks();
+    }
+
+    private async Task LoadBooks()
+    {
+        var books = await BookService.GetAllBooksAsync();
+        allBooks = books?.ToList() ?? new List<Book>();
+        ApplyFilters();
+    }
+
+    private void FilterByCategory(string category)
+    {
+        selectedCategory = category;
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        if (allBooks == null)
+        {
+            filteredBooks = new List<Book>();
+            return;
+        }
+
+        filteredBooks = allBooks.ToList();
+
+        // Apply search filter
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredBooks = filteredBooks
+                .Where(b =>
+                    b.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    b.Author.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    b.Category.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    b.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        // Apply category filter
+        if (!string.IsNullOrWhiteSpace(selectedCategory))
+        {
+            filteredBooks = filteredBooks
+                .Where(b => b.Category.Equals(selectedCategory, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        // Apply availability filter
+        if (showOnlyAvailable)
+        {
+            filteredBooks = filteredBooks.Where(b => b.IsAvailable).ToList();
+        }
+
+        StateHasChanged();
+    }
+
+    private void ResetFilters()
+    {
+        searchTerm = "";
+        selectedCategory = "";
+        showOnlyAvailable = false;
+        filteredBooks = allBooks?.ToList() ?? new List<Book>();
+        StateHasChanged();
+    }
+} 

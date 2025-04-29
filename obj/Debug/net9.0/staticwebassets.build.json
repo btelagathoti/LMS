@@ -1,0 +1,362 @@
+{
+  "Version": 1,
+  "Hash": "B4IBCkAkAknEhXZ+R5HSGochSsfM878KdlmSouU5kqM=",
+  "Source": "LibraryManagementSystem",
+  "BasePath": "_content/LibraryManagementSystem",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "LibraryManagementSystem\\wwwroot",
+      "Source": "LibraryManagementSystem",
+      "ContentRoot": "C:\\babujiCodes\\LMS\\LibraryManagementSystem\\wwwroot\\",
+      "BasePath": "_content/LibraryManagementSystem",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\babujiCodes\\LMS\\LibraryManagementSystem\\obj\\Debug\\net9.0\\compressed\\fwcji6d7r2-v538jsjjd9.gz",
+      "SourceId": "LibraryManagementSystem",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\babujiCodes\\LMS\\LibraryManagementSystem\\obj\\Debug\\net9.0\\compressed\\",
+      "BasePath": "_content/LibraryManagementSystem",
+      "RelativePath": "css/site#[.{fingerprint=v538jsjjd9}]?.css.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "C:\\babujiCodes\\LMS\\LibraryManagementSystem\\wwwroot\\css\\site.css",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "2oq1zi4pv9",
+      "Integrity": "vre60fWcPMO9Xq91LUJ05FbjGW+kTiEkcbble1AOdZA=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "C:\\babujiCodes\\LMS\\LibraryManagementSystem\\wwwroot\\css\\site.css"
+    },
+    {
+      "Identity": "C:\\babujiCodes\\LMS\\LibraryManagementSystem\\wwwroot\\css\\site.css",
+      "SourceId": "LibraryManagementSystem",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\babujiCodes\\LMS\\LibraryManagementSystem\\wwwroot\\",
+      "BasePath": "_content/LibraryManagementSystem",
+      "RelativePath": "css/site#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "v538jsjjd9",
+      "Integrity": "A5VkOQ8GNzNFoSBWyBON+IpcvX+Xkp5qWcktPIzLtcY=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\site.css"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "css/site.css",
+      "AssetFile": "C:\\babujiCodes\\LMS\\LibraryManagementSystem\\obj\\Debug\\net9.0\\compressed\\fwcji6d7r2-v538jsjjd9.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.001242236025"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "804"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"vre60fWcPMO9Xq91LUJ05FbjGW+kTiEkcbble1AOdZA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 20 Apr 2025 23:25:34 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"A5VkOQ8GNzNFoSBWyBON+IpcvX+Xkp5qWcktPIzLtcY=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-A5VkOQ8GNzNFoSBWyBON+IpcvX+Xkp5qWcktPIzLtcY="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.css",
+      "AssetFile": "C:\\babujiCodes\\LMS\\LibraryManagementSystem\\wwwroot\\css\\site.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2332"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"A5VkOQ8GNzNFoSBWyBON+IpcvX+Xkp5qWcktPIzLtcY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 20 Apr 2025 23:25:34 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-A5VkOQ8GNzNFoSBWyBON+IpcvX+Xkp5qWcktPIzLtcY="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.css.gz",
+      "AssetFile": "C:\\babujiCodes\\LMS\\LibraryManagementSystem\\obj\\Debug\\net9.0\\compressed\\fwcji6d7r2-v538jsjjd9.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "804"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"vre60fWcPMO9Xq91LUJ05FbjGW+kTiEkcbble1AOdZA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 20 Apr 2025 23:25:34 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-vre60fWcPMO9Xq91LUJ05FbjGW+kTiEkcbble1AOdZA="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.v538jsjjd9.css",
+      "AssetFile": "C:\\babujiCodes\\LMS\\LibraryManagementSystem\\obj\\Debug\\net9.0\\compressed\\fwcji6d7r2-v538jsjjd9.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.001242236025"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "804"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"vre60fWcPMO9Xq91LUJ05FbjGW+kTiEkcbble1AOdZA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 20 Apr 2025 23:25:34 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"A5VkOQ8GNzNFoSBWyBON+IpcvX+Xkp5qWcktPIzLtcY=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "v538jsjjd9"
+        },
+        {
+          "Name": "label",
+          "Value": "css/site.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-A5VkOQ8GNzNFoSBWyBON+IpcvX+Xkp5qWcktPIzLtcY="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.v538jsjjd9.css",
+      "AssetFile": "C:\\babujiCodes\\LMS\\LibraryManagementSystem\\wwwroot\\css\\site.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2332"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"A5VkOQ8GNzNFoSBWyBON+IpcvX+Xkp5qWcktPIzLtcY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 20 Apr 2025 23:25:34 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "v538jsjjd9"
+        },
+        {
+          "Name": "label",
+          "Value": "css/site.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-A5VkOQ8GNzNFoSBWyBON+IpcvX+Xkp5qWcktPIzLtcY="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.v538jsjjd9.css.gz",
+      "AssetFile": "C:\\babujiCodes\\LMS\\LibraryManagementSystem\\obj\\Debug\\net9.0\\compressed\\fwcji6d7r2-v538jsjjd9.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "804"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"vre60fWcPMO9Xq91LUJ05FbjGW+kTiEkcbble1AOdZA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 20 Apr 2025 23:25:34 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "v538jsjjd9"
+        },
+        {
+          "Name": "label",
+          "Value": "css/site.css.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-vre60fWcPMO9Xq91LUJ05FbjGW+kTiEkcbble1AOdZA="
+        }
+      ]
+    }
+  ]
+}

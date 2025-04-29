@@ -1,0 +1,95 @@
+@page "/books/create"
+@using LibraryManagementSystem.Data.Models
+@using LibraryManagementSystem.Data.Services
+@inject NavigationManager NavigationManager
+@inject IBookService BookService
+
+<h3>Add New Book</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <EditForm Model="@book" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group mb-3">
+                <label for="isbn">ISBN</label>
+                <InputText id="isbn" @bind-Value="book.ISBN" class="form-control" />
+                <ValidationMessage For="@(() => book.ISBN)" />
+                <small class="form-text text-muted">Enter 10 or 13 digit ISBN number</small>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="title">Title</label>
+                <InputText id="title" @bind-Value="book.Title" class="form-control" />
+                <ValidationMessage For="@(() => book.Title)" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="author">Author</label>
+                <InputText id="author" @bind-Value="book.Author" class="form-control" />
+                <ValidationMessage For="@(() => book.Author)" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="category">Category</label>
+                <InputText id="category" @bind-Value="book.Category" class="form-control" />
+                <ValidationMessage For="@(() => book.Category)" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="description">Description</label>
+                <InputTextArea id="description" @bind-Value="book.Description" class="form-control" rows="3" />
+                <ValidationMessage For="@(() => book.Description)" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="publicationDate">Publication Date</label>
+                <InputDate id="publicationDate" @bind-Value="book.PublicationDate" class="form-control" />
+                <ValidationMessage For="@(() => book.PublicationDate)" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="publisher">Publisher</label>
+                <InputText id="publisher" @bind-Value="book.Publisher" class="form-control" />
+                <ValidationMessage For="@(() => book.Publisher)" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="totalCopies">Total Copies</label>
+                <InputNumber id="totalCopies" @bind-Value="book.TotalCopies" class="form-control" />
+                <ValidationMessage For="@(() => book.TotalCopies)" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="location">Location</label>
+                <InputText id="location" @bind-Value="book.Location" class="form-control" />
+                <ValidationMessage For="@(() => book.Location)" />
+                <small class="form-text text-muted">Physical location of the book in the library</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Add Book</button>
+            <button type="button" class="btn btn-secondary" @onclick="NavigateToList">Cancel</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private Book book = new Book
+    {
+        PublicationDate = DateTime.Today,
+        TotalCopies = 1,
+        AvailableCopies = 1
+    };
+
+    private async Task HandleValidSubmit()
+    {
+        await BookService.AddBookAsync(book);
+        NavigateToList();
+    }
+
+    private void NavigateToList()
+    {
+        NavigationManager.NavigateTo("/books");
+    }
+} 

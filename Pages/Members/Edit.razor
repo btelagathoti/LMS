@@ -1,0 +1,167 @@
+@page "/members/edit/{Id:int}"
+@using LibraryManagementSystem.Data.Models
+@using LibraryManagementSystem.Data.Services
+@inject IMemberService MemberService
+@inject NavigationManager NavigationManager
+@inject ILogger<Edit> Logger
+
+<PageTitle>Edit Member - Library Management System</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Edit Member</h1>
+        </div>
+    </div>
+
+    @if (_member == null)
+    {
+        <div class="alert alert-info">Loading...</div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <EditForm Model="@_member" OnValidSubmit="HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+
+                            <div class="form-group mb-3">
+                                <label for="membershipNumber">Membership Number</label>
+                                <InputText id="membershipNumber" @bind-Value="_member.MembershipNumber" class="form-control" />
+                                <ValidationMessage For="@(() => _member.MembershipNumber)" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="firstName">First Name</label>
+                                <InputText id="firstName" @bind-Value="_member.FirstName" class="form-control" />
+                                <ValidationMessage For="@(() => _member.FirstName)" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="lastName">Last Name</label>
+                                <InputText id="lastName" @bind-Value="_member.LastName" class="form-control" />
+                                <ValidationMessage For="@(() => _member.LastName)" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="email">Email</label>
+                                <InputText id="email" @bind-Value="_member.Email" class="form-control" />
+                                <ValidationMessage For="@(() => _member.Email)" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="phone">Phone Number</label>
+                                <InputText id="phone" @bind-Value="_member.PhoneNumber" class="form-control" />
+                                <ValidationMessage For="@(() => _member.PhoneNumber)" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="address">Address</label>
+                                <InputTextArea id="address" @bind-Value="_member.Address" class="form-control" rows="3" />
+                                <ValidationMessage For="@(() => _member.Address)" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="dateOfBirth">Date of Birth</label>
+                                <InputDate id="dateOfBirth" @bind-Value="_member.DateOfBirth" class="form-control" min="1900-01-01" max="@DateTime.UtcNow.ToString("yyyy-MM-dd")" />
+                                <ValidationMessage For="@(() => _member.DateOfBirth)" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="membershipStartDate">Membership Start Date</label>
+                                <InputDate id="membershipStartDate" @bind-Value="_member.MembershipStartDate" class="form-control" max="@DateTime.UtcNow.ToString("yyyy-MM-dd")" />
+                                <ValidationMessage For="@(() => _member.MembershipStartDate)" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="membershipEndDate">Membership End Date</label>
+                                <InputDate id="membershipEndDate" @bind-Value="_member.MembershipEndDate" class="form-control" min="@_member.MembershipStartDate.ToString("yyyy-MM-dd")" />
+                                <ValidationMessage For="@(() => _member.MembershipEndDate)" />
+                                <small class="form-text text-muted">Leave empty for unlimited membership</small>
+                            </div>
+
+                            <div class="alert alert-info mt-3">
+                                <h5>Member Information</h5>
+                                <p>Membership Start Date: @_member.MembershipStartDate.ToLocalTime().ToString("dd MMM yyyy")</p>
+                                <p>Status: @(_member.IsActive ? "Active" : "Inactive")</p>
+                                <p>Borrowed Books: @(_member.BorrowedBooks?.Count ?? 0)</p>
+                                <p>Created At: @_member.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</p>
+                                <p>Last Updated: @_member.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</p>
+                                @if (_member.LastLoginDate.HasValue)
+                                {
+                                    <p>Last Login: @_member.LastLoginDate.Value.ToLocalTime().ToString("dd MMM yyyy HH:mm")</p>
+                                }
+                            </div>
+
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary">Save</button>
+                                <button type="button" class="btn btn-secondary" @onclick="NavigateToList">Cancel</button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Member? _member;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _member = await MemberService.GetMemberByIdAsync(Id);
+            if (_member == null)
+            {
+                _errorMessage = $"Member with ID {Id} not found.";
+                NavigateToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading member with ID {Id}", Id);
+            _errorMessage = "Error loading member details.";
+            NavigateToList();
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (_member != null)
+            {
+                // Ensure dates are in UTC
+                _member.UpdatedAt = DateTime.UtcNow;
+                if (_member.MembershipEndDate.HasValue)
+                {
+                    _member.MembershipEndDate = DateTime.SpecifyKind(_member.MembershipEndDate.Value.Date, DateTimeKind.Utc);
+                }
+                _member.MembershipStartDate = DateTime.SpecifyKind(_member.MembershipStartDate.Date, DateTimeKind.Utc);
+                _member.DateOfBirth = DateTime.SpecifyKind(_member.DateOfBirth.Date, DateTimeKind.Utc);
+
+                await MemberService.UpdateMemberAsync(_member);
+                NavigateToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error updating member with ID {Id}", Id);
+            _errorMessage = "Error updating member details.";
+        }
+    }
+
+    private void NavigateToList()
+    {
+        NavigationManager.NavigateTo("/members");
+    }
+} 
